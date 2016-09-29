@@ -12,6 +12,10 @@
 <h2>Available sessions ready to play</h2>
 
 <?php
+define("BLANK_TOKEN"," ");
+define("O_TOKEN","0");
+define("X_TOKEN","X");
+
 # tancament de sessió
 if( isset($_GET['sortir']) ) {
 	session_start();
@@ -50,6 +54,56 @@ if( $ses>0 && $ses<10 ) {
 function juga_partida() {
 	echo "<p>Sessió: ".session_id()."</p>\n";
 	echo "<p><a href='?sortir=1'>Sortir de la sessió</a></p>";
+	inicia_partida();
+	check_accio();
+	//TODO:check_final();
+	render_partida();
+}
+
+function inicia_partida() {
+	if( !isset($_SESSION["t11"]) ) {
+		$_SESSION["t11"] = BLANK_TOKEN;
+		$_SESSION["t12"] = BLANK_TOKEN;
+		$_SESSION["t13"] = BLANK_TOKEN;
+		$_SESSION["t21"] = BLANK_TOKEN;
+		$_SESSION["t22"] = BLANK_TOKEN;
+		$_SESSION["t23"] = BLANK_TOKEN;
+		$_SESSION["t31"] = BLANK_TOKEN;
+		$_SESSION["t32"] = BLANK_TOKEN;
+		$_SESSION["t33"] = O_TOKEN;
+	}	
+}
+
+function check_accio() {
+	if( isset($_GET["cela"]) ) {
+		$cela = $_GET["cela"];
+		echo "<p>Has clicat ".$cela."</p>";
+		$_SESSION[$cela] = X_TOKEN;
+	}
+}
+
+function render_partida() {
+	echo "<table border=1>\n";
+	for($i=1;$i<=3;$i++) {
+		echo "<tr>\n";
+		for($j=1;$j<=3;$j++) {
+			echo "<td>";
+			switch( $_SESSION["t$i$j"] ) {
+				case O_TOKEN:
+					echo "<button disabled=true>O</button>";
+					break;
+				case X_TOKEN:
+					echo "<button disabled=true>X</button>";
+					break;
+				case BLANK_TOKEN:
+					echo "<button onclick='location.href=\"?cela=t$i$j\"'>??</button>";
+					break;
+			}
+			echo "</td>\n";
+		}
+		echo "</tr>\n";
+	}
+	echo "</table>\n";
 }
 
 ?>
