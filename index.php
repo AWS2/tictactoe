@@ -12,12 +12,17 @@
 <h2>Available sessions ready to play</h2>
 
 <?php
+define("JUGADOR","JUGADOR");
 define("BLANK_TOKEN"," ");
-define("O_TOKEN","0");
+define("O_TOKEN","O");
 define("X_TOKEN","X");
 
 # tancament de sessió
 if( isset($_GET['sortir']) ) {
+	session_start();
+	# esborra dades
+	session_destroy();
+	# engega sessió nova
 	session_start();
 	session_regenerate_id();
 	echo "<p>Has sortit de la sessió.</p>\n";
@@ -52,8 +57,15 @@ if( $ses>0 && $ses<10 ) {
 }
 
 function juga_partida() {
-	echo "<p>Sessió: ".session_id()."</p>\n";
-	echo "<p><a href='?sortir=1'>Sortir de la sessió</a></p>";
+	#echo "<p>Sessió: ".session_id()."</p>\n";
+	if( isset($_SESSION["njugadors"]) && $_SESSION["njugadors"]>=2 ) {
+		echo "<p>Partida plena.<a href='#'>Tornar</a></p>";
+		session_regenerate_id();
+		echo "<p>Sessió: ".session_id()."</p>\n";
+	} else {
+		echo "<p><a href='?sortir=1'>Sortir de la sessió</a></p>";
+	}
+
 	inicia_partida();
 	check_accio();
 	//TODO:check_final();
@@ -70,15 +82,30 @@ function inicia_partida() {
 		$_SESSION["t23"] = BLANK_TOKEN;
 		$_SESSION["t31"] = BLANK_TOKEN;
 		$_SESSION["t32"] = BLANK_TOKEN;
-		$_SESSION["t33"] = O_TOKEN;
-	}	
+		$_SESSION["t33"] = BLANK_TOKEN;
+		$_SESSION["njugadors"] = 1;
+		echo "<p>Iniciant partida</p>\n";
+		setcookie( JUGADOR, O_TOKEN );
+		echo "<p>Assignat jugador O</p>";
+		echo "<a href=''>Comença la partida</a>\n";
+		echo "</body></html>";
+		die();
+	} elseif ( !isset($_COOKIE[JUGADOR]) && $_SESSION["njugadors"]==1 ) {
+		setcookie( JUGADOR, X_TOKEN );
+		echo "<p>Assignat jugador X</p>";
+		echo "<a href=''>Comença la partida</a>\n";
+		echo "</body></html>";
+		die();
+	}
 }
 
 function check_accio() {
+	$token = $_COOKIE[JUGADOR];
+	echo "<p>Ets els jugador $token</p>\n";
 	if( isset($_GET["cela"]) ) {
 		$cela = $_GET["cela"];
-		echo "<p>Has clicat ".$cela."</p>";
-		$_SESSION[$cela] = X_TOKEN;
+		echo "<p>Has clicat ".$cela."</p>\n";
+		$_SESSION[$cela] = $token;
 	}
 }
 
